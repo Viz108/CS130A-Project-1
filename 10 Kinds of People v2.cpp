@@ -84,12 +84,44 @@ main()
     for(int i = 0; i < adjacencyList.size(); i++)
     {
         if(adjacencyList.at(i).visited == false)
-        {
-            cout << "Exploration call " << i << endl; 
+        { 
             explore(i, adjacencyList.at(i).value, currComponentNumber, r, c, adjacencyList); 
             currComponentNumber++; 
         }
     }
 
+    //Read in search coordinates and see if they are in the same component
+    int n; 
+    cin >> n; 
 
+    for(int i = 0; i < n; i++)
+    {
+        int r1, c1, r2, c2; 
+        cin >> r1; 
+        cin >> c1; 
+        cin >> r2; 
+        cin >> c2; 
+
+        int startIndex = (r1-1)*c + (c1-1); 
+        int endIndex = (r2-1)*c + (c2-1); 
+
+        if(adjacencyList.at(startIndex).componentNumber == adjacencyList.at(endIndex).componentNumber)
+        {
+            if(adjacencyList.at(startIndex).value == 0)
+            {
+                cout << "binary" << endl; 
+            }
+            else 
+            {
+                cout << "decimal" << endl; 
+            }
+        }
+        else
+        {
+            cout << "neither" << endl; 
+        }
+    }
+
+
+    
 }
