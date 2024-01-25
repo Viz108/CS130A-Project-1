@@ -19,7 +19,7 @@ bool explore(int x, int y, int rowLength, int search_x, int search_y, int pathVa
     int startIndex = (y*rowLength)+x; 
     if(list.at(startIndex).visited == true)
     {
-        //cout << "Already searched" << endl; 
+        cout << "Already searched" << endl; 
         return false; 
     }
     else
@@ -48,10 +48,11 @@ bool explore(int x, int y, int rowLength, int search_x, int search_y, int pathVa
         bool searchFlag = false; 
         for(int i = 0; i < list.at(startIndex).neighbors.size(); i++)
         {
-            //cout << "Searching neighbor" << i << endl; 
+            cout << "Searching neighbor" << i << endl; 
             if(explore(list.at(list.at(startIndex).neighbors.at(i)).x, list.at(list.at(startIndex).neighbors.at(i)).y, rowLength, search_x, search_y, pathValue, list))
             {
                 searchFlag = true;
+                break; 
             }
         }
         return searchFlag; 
@@ -68,18 +69,14 @@ main()
     cin >> r; 
     cin >> c; 
 
-    //read strings into a vector and go through characters in parallel
     vector<string> strings; 
     for(int i = 0; i < r; i++)
     {
+        //cout << "Row " << i << endl; 
         string newString; 
         cin >> newString; 
-        strings.push_back(newString);         
-    }
-    //cout << "Finished inputting string" << endl; 
-    for(int i = 0; i < r; i++)
-    {
-        //cout << "Row " << i << endl; 
+        strings.push_back(newString);  
+
         for(int j = 0; j < c; j++)
         {
             //cout << "Col " << j << endl; 
