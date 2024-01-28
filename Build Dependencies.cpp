@@ -7,46 +7,29 @@
 
 using namespace std; 
 
-void searchDependencies(string currentFile, map<string, vector<string>> &list, set<string> &visitedFiles, queue<string> &printQueue, set<string> &addedToPrint)
+
+struct fileInfo
 {
-    // cout << "currently exploring " << currentFile << endl; 
-    // cout << "visited files are: " << endl; 
-    // for(auto& str : visitedFiles)
-    // {
-    //     cout << str << endl; 
-    // }
-    // cout << endl; 
+    vector<string> dependents = vector<string>(); 
+    bool visited = false; 
+}; 
 
-    // cout << "print queue is currently: " << endl; 
-    // for(auto& str : addedToPrint)
-    // {
-    //     cout << str << endl; 
-    // }
-    // cout << endl; 
-
-    visitedFiles.insert(currentFile); 
-    for(int i = 0; i < list[currentFile].size(); i++)
+void searchDependencies(string searchFile, map<string, fileInfo> &list, vector<string> &printQueue)
+{   
+    list.at(searchFile).visited = true; 
+    for(int i = 0; i < list.at(searchFile).dependents.size(); i++)
     {
-        if(addedToPrint.find(list[currentFile][i]) == addedToPrint.end())
+        if(!list.at(list.at(searchFile).dependents.at(i)).visited)
         {
-            // cout << "adding " << list[currentFile][i] << " to print queue" << endl; 
-            // cout << endl; 
-            printQueue.push(list[currentFile][i]); 
-            addedToPrint.insert(list[currentFile][i]);
+            searchDependencies(list.at(searchFile).dependents.at(i), list, printQueue);  
         }
     }
-    for(int i = 0; i < list[currentFile].size(); i++)
-    {
-        if(visitedFiles.find(list[currentFile][i]) == visitedFiles.end())
-        {
-            searchDependencies(list[currentFile][i], list, visitedFiles, printQueue, addedToPrint); 
-        }
-    }
+    printQueue.push_back(searchFile); 
 }
 
 main()
 {
-    map<string, vector<string>> adjacencyList; 
+    map<string, fileInfo> adjacencyList; 
 
     int n; 
     cin >> n; 
@@ -61,7 +44,8 @@ main()
         currLine.erase(0, currLine.find(":") + 1); 
 
         //If current file isn't in list, add it
-        adjacencyList.insert(pair{currFile, vector<string>()}); 
+
+        adjacencyList.insert(pair{currFile, fileInfo()}); 
 
         while(currLine.length() != 0)
         { 
@@ -85,12 +69,12 @@ main()
             //Add current file to the dependencies dependent list
             if(adjacencyList.find(newDepend) != adjacencyList.end())
             {
-                adjacencyList[newDepend].push_back(currFile); 
+                adjacencyList[newDepend].dependents.push_back(currFile); 
             }
             else
             {
-                adjacencyList.insert(pair{newDepend, vector<string>()}); 
-                adjacencyList[newDepend].push_back(currFile); 
+                adjacencyList.insert(pair{newDepend, fileInfo()}); 
+                adjacencyList[newDepend].dependents.push_back(currFile); 
             }    
         }
     }
@@ -108,14 +92,12 @@ main()
     //Run DFS from search file and print dependencies in order
     string searchFile; 
     cin >> searchFile; 
-    set<string> visitedFilesList; 
-    queue<string> printQueueList; 
-    set<string> queuedPrintFiles; 
-    printQueueList.push(searchFile); 
-    searchDependencies(searchFile, adjacencyList, visitedFilesList, printQueueList, queuedPrintFiles); 
-    while(!printQueueList.empty())
+    vector<string> printQueue; 
+    searchDependencies(searchFile, adjacencyList, printQueue);
+    for(int i = printQueue.size() - 1; i >= 0; i--)
     {
-        cout << printQueueList.front() << endl; 
-        printQueueList.pop(); 
+        cout << printQueue.at(i) << endl; 
     }
+
+
 }
