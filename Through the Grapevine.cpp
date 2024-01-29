@@ -3,45 +3,21 @@
 #include <vector>
 #include <queue> 
 #include <map>
+#include <set>
 
 using namespace std; 
 
 struct personInfo
 {
+    string name; 
     int skepticism; 
+    int dayVisited = 1; 
     vector<string> neighbors; 
     vector<string> talkedTo; 
+    set<string> visitedBy; 
     bool visited = false;
     bool talked = false;
 };
-
-void explore( map<string, personInfo> &queue, string currSearch, int daysToSearch, string talkedTo)
-{
-    
-    queue.at(currSearch).visited = true; 
-    
-    bool alreadyTalkedTo = false;
-        for(int i = 0; i < queue.at(currSearch).talkedTo.size(); i++)
-    {
-        if(queue.at(currSearch).talkedTo.at(i) == talkedTo)
-        {
-            alreadyTalkedTo = true;
-        }
-    }
-    if(!alreadyTalkedTo)
-    {
-        queue.at(currSearch).skepticism--;
-        queue.at(currSearch).talkedTo.push_back(talkedTo);
-    }
-    if(daysToSearch > 0 && !queue.at(currSearch).talked && queue.at(currSearch).skepticism <= 0)
-    {
-        queue.at(currSearch).talked = true; 
-        for(int i = 0; i < queue.at(currSearch).neighbors.size(); i++)
-        {
-            explore(queue, queue.at(currSearch).neighbors.at(i), --daysToSearch, currSearch); 
-        }
-    }
-}
 
 main()
 {
@@ -50,7 +26,7 @@ main()
     cin >> m; //Num connections
     cin >> d; //Num days
 
-    map<string, personInfo> queue; 
+    map<string, personInfo> adjacencyList; 
 
     for(int i = 0; i < n; i++)
     {
@@ -60,8 +36,9 @@ main()
         cin >> skepticism; 
 
         personInfo tempPerson; 
+        tempPerson.name = name; 
         tempPerson.skepticism = skepticism; 
-        queue.insert(pair{name,tempPerson});        
+        adjacencyList.insert(pair{name,tempPerson});        
     }
 
     for(int i = 0; i < m; i++)
@@ -70,37 +47,71 @@ main()
         string connection; 
         cin >> origin; 
         cin >> connection; 
-        queue.at(origin).neighbors.push_back(connection);
-        queue.at(connection).neighbors.push_back(origin);
+        adjacencyList.at(origin).neighbors.push_back(connection);
+        adjacencyList.at(connection).neighbors.push_back(origin);
     }
 
     string rumorStart; 
     cin >> rumorStart; 
-    
-    explore(queue, rumorStart, d, "");
 
-    int numVisited; 
-    for(const auto &p : queue)
+    int peopleHeard = 0; 
+    adjacencyList.at(rumorStart).dayVisited = 1; 
+    queue<string> BFSQueue; 
+    BFSQueue.push(rumorStart); 
+    while(BFSQueue.size() > 0)
     {
-        if(p.second.visited)
+        cout << "Currently visiting " << BFSQueue.front() << " on day " << adjacencyList.at(BFSQueue.front()).dayVisited << endl; 
+        if(adjacencyList.at(BFSQueue.front()).visited == false)
         {
-            numVisited++; 
+            cout << "   First time visiting" << endl; 
+            adjacencyList.at(BFSQueue.front()).visited = true; 
+            peopleHeard++;
         }
+
+        if(!(adjacencyList.at(BFSQueue.front()).talked) && (adjacencyList.at(BFSQueue.front()).visitedBy.size() >= adjacencyList.at(BFSQueue.front()).skepticism) && adjacencyList.at(BFSQueue.front()).dayVisited < d)
+        {
+            cout << "   Spreading rumor" << endl;
+            for(int i = 0; i < adjacencyList.at(BFSQueue.front()).neighbors.size(); i++)
+            {
+                cout << "   Talking to " << adjacencyList.at(BFSQueue.front()).neighbors.at(i) << endl; 
+                BFSQueue.push(adjacencyList.at(BFSQueue.front()).neighbors.at(i)); 
+                adjacencyList.at(adjacencyList.at(BFSQueue.front()).neighbors.at(i)).dayVisited = adjacencyList.at(BFSQueue.front()).dayVisited + 1;    
+                adjacencyList.at(adjacencyList.at(BFSQueue.front()).neighbors.at(i)).visitedBy.insert(BFSQueue.front()); 
+            }
+            adjacencyList.at(BFSQueue.front()).talked = true;
+        }
+        
+        BFSQueue.pop();
     }
 
-    numVisited--; //Remove 1 for rumor starter
+    peopleHeard--; 
+    cout << peopleHeard << endl; 
+    
+    //explore(adjacencyList, rumorStart, d, "");
 
-    cout << numVisited << endl; 
-
-    // for(const auto &p : queue)
+    // int numVisited; 
+    // for(const auto &p : adjacencyList)
     // {
-    //     cout << p.first << ":" << endl; 
-    //     for(int i = 0; i < p.second.neighbors.size(); i++)
+    //     if(p.second.visited)
     //     {
-    //         cout << "   " << p.second.neighbors.at(i) << endl; 
+    //         numVisited++; 
     //     }
-    //     cout << "Visited: " << p.second.visited << endl; 
-    //     cout << "Talked: " << p.second.talked << endl; 
-    //     cout << "Skepticsm: " << p.second.skepticism << endl; 
     // }
+
+    // numVisited--; //Remove 1 for rumor starter
+
+    // cout << numVisited << endl; 
+
+    for(const auto &p : adjacencyList)
+    {
+        cout << p.first << ":" << endl; 
+        for(int i = 0; i < p.second.neighbors.size(); i++)
+        {
+            cout << "   " << p.second.neighbors.at(i) << endl; 
+        }
+        cout << "Visited: " << p.second.visited << endl; 
+        cout << "Talked: " << p.second.talked << endl; 
+        cout << "Skepticsm: " << p.second.skepticism << endl; 
+        cout << "Day visited: " << p.second.dayVisited << endl; 
+    }
 }
