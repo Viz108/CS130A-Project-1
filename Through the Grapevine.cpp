@@ -11,12 +11,12 @@ struct personInfo
 {
     string name; 
     int skepticism; 
-    int dayVisited = 1; 
     vector<string> neighbors; 
     vector<string> talkedTo; 
     set<string> visitedBy; 
     bool visited = false;
     bool talked = false;
+    bool dateLock = false; 
 };
 
 main()
@@ -55,30 +55,30 @@ main()
     cin >> rumorStart; 
 
     int peopleHeard = 0; 
-    adjacencyList.at(rumorStart).dayVisited = 1; 
-    queue<string> BFSQueue; 
-    BFSQueue.push(rumorStart); 
+    queue<pair<string,int>> BFSQueue; 
+    BFSQueue.push(pair{rumorStart, 1}); 
     while(BFSQueue.size() > 0)
     {
-        cout << "Currently visiting " << BFSQueue.front() << " on day " << adjacencyList.at(BFSQueue.front()).dayVisited << endl; 
-        if(adjacencyList.at(BFSQueue.front()).visited == false)
+        //cout << "Currently visiting " << BFSQueue.front() << " on day " << adjacencyList.at(BFSQueue.front()).dayVisited << endl; 
+        if(adjacencyList.at(BFSQueue.front().first).visited == false)
         {
-            cout << "   First time visiting" << endl; 
-            adjacencyList.at(BFSQueue.front()).visited = true; 
+            //cout << "   First time visiting" << endl; 
+            adjacencyList.at(BFSQueue.front().first).visited = true; 
             peopleHeard++;
         }
 
-        if(!(adjacencyList.at(BFSQueue.front()).talked) && (adjacencyList.at(BFSQueue.front()).visitedBy.size() >= adjacencyList.at(BFSQueue.front()).skepticism) && adjacencyList.at(BFSQueue.front()).dayVisited < d)
+        if(!(adjacencyList.at(BFSQueue.front().first).talked) && (adjacencyList.at(BFSQueue.front().first).visitedBy.size() >= adjacencyList.at(BFSQueue.front().first).skepticism) && BFSQueue.front().second <= d)
         {
-            cout << "   Spreading rumor" << endl;
-            for(int i = 0; i < adjacencyList.at(BFSQueue.front()).neighbors.size(); i++)
+            //cout << "   Spreading rumor" << endl;
+            for(int i = 0; i < adjacencyList.at(BFSQueue.front().first).neighbors.size(); i++)
             {
-                cout << "   Talking to " << adjacencyList.at(BFSQueue.front()).neighbors.at(i) << endl; 
-                BFSQueue.push(adjacencyList.at(BFSQueue.front()).neighbors.at(i)); 
-                adjacencyList.at(adjacencyList.at(BFSQueue.front()).neighbors.at(i)).dayVisited = adjacencyList.at(BFSQueue.front()).dayVisited + 1;    
-                adjacencyList.at(adjacencyList.at(BFSQueue.front()).neighbors.at(i)).visitedBy.insert(BFSQueue.front()); 
+                //cout << "   Talking to " << adjacencyList.at(BFSQueue.front()).neighbors.at(i) << endl; 
+                BFSQueue.push(pair{adjacencyList.at(BFSQueue.front().first).neighbors.at(i), BFSQueue.front().second + 1}); 
+                //adjacencyList.at(adjacencyList.at(BFSQueue.front().first).neighbors.at(i)).dayVisited = adjacencyList.at(BFSQueue.front().first).dayVisited + 1;  
+
+                adjacencyList.at(adjacencyList.at(BFSQueue.front().first).neighbors.at(i)).visitedBy.insert(BFSQueue.front().first); 
             }
-            adjacencyList.at(BFSQueue.front()).talked = true;
+            adjacencyList.at(BFSQueue.front().first).talked = true;
         }
         
         BFSQueue.pop();
@@ -102,16 +102,16 @@ main()
 
     // cout << numVisited << endl; 
 
-    for(const auto &p : adjacencyList)
-    {
-        cout << p.first << ":" << endl; 
-        for(int i = 0; i < p.second.neighbors.size(); i++)
-        {
-            cout << "   " << p.second.neighbors.at(i) << endl; 
-        }
-        cout << "Visited: " << p.second.visited << endl; 
-        cout << "Talked: " << p.second.talked << endl; 
-        cout << "Skepticsm: " << p.second.skepticism << endl; 
-        cout << "Day visited: " << p.second.dayVisited << endl; 
-    }
+    // for(const auto &p : adjacencyList)
+    // {
+    //     cout << p.first << ":" << endl; 
+    //     for(int i = 0; i < p.second.neighbors.size(); i++)
+    //     {
+    //         cout << "   " << p.second.neighbors.at(i) << endl; 
+    //     }
+    //     cout << "Visited: " << p.second.visited << endl; 
+    //     cout << "Talked: " << p.second.talked << endl; 
+    //     cout << "Skepticsm: " << p.second.skepticism << endl; 
+    //     cout << "Day visited: " << p.second.dayVisited << endl; 
+    // }
 }
